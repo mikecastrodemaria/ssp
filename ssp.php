@@ -197,6 +197,25 @@ class SSP {
         return $where;
     }
 
+   /**
+     * cleanArray function
+     * test UTF-8 encoding, if not, force it to be encode
+     * it avoid iso char problem
+     * 
+     * @access public
+     * @static
+     * @param mixed &$value
+     * @return void
+     */
+    static function cleanArray(&$value) {
+
+        if ( mb_detect_encoding($value, 'UTF-8', true) != 'UTF-8' )
+        {
+            $value = utf8_encode($value);
+        }
+        return $value;
+    }
+
 
     /**
      * Perform the SQL queries needed for an server-side processing requested,
@@ -259,6 +278,9 @@ class SSP {
         }
 
         $data = SSP::sql_exec( $db, $bindings,$query);
+	
+	// clean data return to avoid bad encoding
+	array_walk_recursive( $data,'self::cleanArray');
 
         // Data set length after filtering
         $resFilterLength = SSP::sql_exec( $db,
